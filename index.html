@@ -311,7 +311,7 @@
         <div id="txt_suggest">建議設定 Play Speed</div>
         <span class="big-number" id="suggestedSpeed">1.00</span>
         <div id="limitWarning" class="warning-text" style="display:none;"></div>
-        <div id="suggestedActual" style="margin-top:8px;">換算後實際原始BPM: -</div>
+        <div id="suggestedActual" style="margin-top:8px;">變速後原始BPM: -</div>
     </div>
 
     <div class="divider"></div>
@@ -325,7 +325,7 @@
         <input type="range" id="speedSlider" min="0" max="16" step="1" value="6" oninput="updateDensityTable()">
         
         <div style="font-size:0.95rem; color:#555;">
-            <span id="lbl_curr_actual">換算後實際原始BPM</span>: 
+            <span id="lbl_curr_actual">變速後原始BPM</span>: 
             <span id="currentActualBpm" style="color:#2c3e50; font-weight:800; font-size:1.2rem;">-</span>
         </div>
     </div>
@@ -372,11 +372,11 @@
             lbl_target: "目標練習 BPM",
             btn_calc: "計算最佳倍率 (Play Speed)",
             txt_suggest: "建議設定 Play Speed",
-            txt_actual_res: "換算後實際原始BPM: ",
+            txt_actual_res: "變速後原始BPM: ",
             txt_diff_prefix: "誤差",
             h_sim: "B. 各音符密度與PLAY SPEED模擬",
             lbl_slider: "手動調整 Play Speed",
-            lbl_curr_actual: "換算後實際原始BPM",
+            lbl_curr_actual: "變速後原始BPM",
             th_type: "音符密度類型",
             th_equiv: "等效 16分音 BPM",
             row_16: "16分音 (標準)",
@@ -399,11 +399,11 @@
             lbl_target: "目標BPM",
             btn_calc: "最適倍率を計算",
             txt_suggest: "推奨プレイスピード",
-            txt_actual_res: "換算後の実質BPM: ",
+            txt_actual_res: "変速後BPM: ",
             txt_diff_prefix: "誤差",
             h_sim: "B. 音符タイプとPLAY SPEEDの模擬",
             lbl_slider: "倍率調整 (Play Speed)",
-            lbl_curr_actual: "換算後の実質BPM",
+            lbl_curr_actual: "変速後BPM",
             th_type: "音符タイプ",
             th_equiv: "16分音符換算",
             row_16: "16分音符 (標準)",
@@ -426,11 +426,11 @@
             lbl_target: "목표 BPM",
             btn_calc: "최적 배속 계산",
             txt_suggest: "추천 플레이 속도",
-            txt_actual_res: "환산 후 실제 BPM: ",
+            txt_actual_res: "변속 후 BPM: ",
             txt_diff_prefix: "오차",
             h_sim: "B. 노트 종류 및 PLAY SPEED 시뮬레이션",
             lbl_slider: "플레이 속도 조절",
-            lbl_curr_actual: "환산 후 실제 BPM",
+            lbl_curr_actual: "변속 후 BPM",
             th_type: "노트 밀도",
             th_equiv: "16비트 환산 BPM",
             row_16: "16비트 (표준)",
@@ -453,11 +453,11 @@
             lbl_target: "Target BPM",
             btn_calc: "Calculate Best Speed",
             txt_suggest: "Best Play Speed",
-            txt_actual_res: "Converted Base BPM: ",
+            txt_actual_res: "Speed Adjusted BPM: ",
             txt_diff_prefix: "Error",
             h_sim: "B. Density & Speed Simulation",
             lbl_slider: "Adjust Play Speed",
-            lbl_curr_actual: "Converted Base BPM",
+            lbl_curr_actual: "Speed Adjusted BPM",
             th_type: "Note Type",
             th_equiv: "Equiv. 16th BPM",
             row_16: "16th Note (Standard)",
@@ -636,19 +636,12 @@
             limitWarning.style.display = 'none';
         }
 
-        // ==========================================
-        // 修正後的邏輯:
-        // 1. 理論上的目標 Raw BPM = (目標密度) / 原始歌曲權重
-        //    (例如: 200(16分) / 0.666(12分) = 300 BPM)
-        // 2. 實際的 Raw BPM = 原始 BPM * 倍率
-        //    (例如: 255 * 1.2 = 306 BPM)
-        // 3. 誤差 = 實際 - 理論
-        // ==========================================
-        const effectiveTargetDensity = target * targetRatio; // 200 * 1 = 200 (當量)
-        const idealRawBpm = effectiveTargetDensity / baseRatio; // 200 / 0.666 = 300
-        const actualRawBpm = base * bestSpeed; // 255 * 1.2 = 306
+        // 誤差邏輯：(實際變速後的原始BPM) - (目標密度正規化後的理想原始BPM)
+        const effectiveTargetDensity = target * targetRatio;
+        const idealRawBpm = effectiveTargetDensity / baseRatio;
+        const actualRawBpm = base * bestSpeed;
 
-        const diffVal = actualRawBpm - idealRawBpm; // 306 - 300 = +6
+        const diffVal = actualRawBpm - idealRawBpm;
 
         document.getElementById('suggestedActual').innerHTML = 
             `${t.txt_actual_res}${actualRawBpm.toFixed(1)} <br>` + 
