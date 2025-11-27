@@ -49,7 +49,7 @@
 
         h1 {
             text-align: center;
-            font-size: 1.4rem; /* 稍微縮小一點字體以適應較長的標題 */
+            font-size: 1.4rem;
             font-weight: 800;
             color: #2c3e50;
             margin: 10px 0 20px 0;
@@ -93,10 +93,10 @@
             align-items: center;
         }
         
-        /* 修改：BPM 輸入框改為固定寬度，節省空間給選單 */
+        /* BPM 輸入框固定寬度 */
         .global-input {
-            width: 110px;       /* 給予固定寬度，夠顯示3位數即可 */
-            flex: none;         /* 不參與彈性伸縮 */
+            width: 110px;
+            flex: none;
             padding: 10px;
             border: 2px solid #ddd;
             border-radius: 8px;
@@ -110,18 +110,18 @@
             outline: none;
         }
         
-        /* 修改：選單佔滿剩餘空間 */
+        /* 選單佔滿剩餘空間 */
         select.type-select {
-            flex: 1;            /* 佔據剩餘所有空間 */
-            width: 100%;        /* 確保寬度填滿 */
-            min-width: 0;       /* 防止內容過長爆框 */
+            flex: 1;
+            width: 100%;
+            min-width: 0;
             padding: 10px 5px;
             border: 1px solid #ccc;
             border-radius: 8px;
             background: white;
             font-size: 0.95rem;
             color: #333;
-            text-overflow: ellipsis; /* 文字過長顯示... */
+            text-overflow: ellipsis;
         }
 
         /* 分隔線 */
@@ -145,7 +145,6 @@
             gap: 8px;
         }
         input.sub-input {
-            /* 下方目標 BPM 也套用同樣邏輯，讓選單空間大一點 */
             flex: 1; 
             padding: 12px;
             border: 1px solid #ddd;
@@ -374,7 +373,7 @@
             btn_calc: "計算最佳倍率 (Play Speed)",
             txt_suggest: "建議設定 Play Speed",
             txt_actual_res: "換算後實際原始BPM: ",
-            txt_diff_prefix: "距離目標BPM",
+            txt_diff_prefix: "誤差",
             h_sim: "B. 各音符密度與PLAY SPEED模擬",
             lbl_slider: "手動調整 Play Speed",
             lbl_curr_actual: "換算後實際原始BPM",
@@ -401,7 +400,7 @@
             btn_calc: "最適倍率を計算",
             txt_suggest: "推奨プレイスピード",
             txt_actual_res: "換算後の実質BPM: ",
-            txt_diff_prefix: "目標BPMとの差",
+            txt_diff_prefix: "誤差",
             h_sim: "B. 音符タイプとPLAY SPEEDの模擬",
             lbl_slider: "倍率調整 (Play Speed)",
             lbl_curr_actual: "換算後の実質BPM",
@@ -428,7 +427,7 @@
             btn_calc: "최적 배속 계산",
             txt_suggest: "추천 플레이 속도",
             txt_actual_res: "환산 후 실제 BPM: ",
-            txt_diff_prefix: "목표 BPM과의 차이",
+            txt_diff_prefix: "오차",
             h_sim: "B. 노트 종류 및 PLAY SPEED 시뮬레이션",
             lbl_slider: "플레이 속도 조절",
             lbl_curr_actual: "환산 후 실제 BPM",
@@ -455,7 +454,7 @@
             btn_calc: "Calculate Best Speed",
             txt_suggest: "Best Play Speed",
             txt_actual_res: "Converted Base BPM: ",
-            txt_diff_prefix: "Diff from Target",
+            txt_diff_prefix: "Error",
             h_sim: "B. Density & Speed Simulation",
             lbl_slider: "Adjust Play Speed",
             lbl_curr_actual: "Converted Base BPM",
@@ -602,7 +601,7 @@
 
         const effectiveBase = base * baseRatio;
         const effectiveTarget = target * targetRatio;
-        const rawRatio = effectiveTarget / effectiveBase; // 計算原始需求的倍率
+        const rawRatio = effectiveTarget / effectiveBase;
         
         let bestSpeed = 1.0;
         let warningMsg = "";
@@ -637,14 +636,24 @@
             limitWarning.style.display = 'none';
         }
 
-        const actualDensity = effectiveBase * bestSpeed;
-        const diffVal = actualDensity - effectiveTarget;
-        const audioBpm = base * bestSpeed;
+        // ==========================================
+        // 修正後的邏輯:
+        // 1. 理論上的目標 Raw BPM = (目標密度) / 原始歌曲權重
+        //    (例如: 200(16分) / 0.666(12分) = 300 BPM)
+        // 2. 實際的 Raw BPM = 原始 BPM * 倍率
+        //    (例如: 255 * 1.2 = 306 BPM)
+        // 3. 誤差 = 實際 - 理論
+        // ==========================================
+        const effectiveTargetDensity = target * targetRatio; // 200 * 1 = 200 (當量)
+        const idealRawBpm = effectiveTargetDensity / baseRatio; // 200 / 0.666 = 300
+        const actualRawBpm = base * bestSpeed; // 255 * 1.2 = 306
+
+        const diffVal = actualRawBpm - idealRawBpm; // 306 - 300 = +6
 
         document.getElementById('suggestedActual').innerHTML = 
-            `${t.txt_actual_res}${audioBpm.toFixed(1)} <br>` + 
+            `${t.txt_actual_res}${actualRawBpm.toFixed(1)} <br>` + 
             `<span style="font-size:0.9rem; color:#666;">` +
-            `(${t.txt_diff_prefix} ${diffVal > 0 ? '+' : ''}${diffVal.toFixed(1)})` + 
+            `(${t.txt_diff_prefix} ${diffVal > 0 ? '+' : ''}${diffVal.toFixed(1)} BPM)` + 
             `</span>`;
 
         if(moveSlider) {
