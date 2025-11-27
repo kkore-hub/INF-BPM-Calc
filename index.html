@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BPM Calculator Ultimate</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", "Meiryo", "Malgun Gothic", sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            padding: 25px;
+            padding-top: 20px;
+        }
+
+        /* 語言列 */
+        .lang-bar {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .lang-btn {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 15px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+            font-weight: bold;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin: 10px 0 20px 0;
+        }
+
+        /* --- 全域設定區 (頂部) --- */
+        .global-section {
+            background: #fff8e1; /* 淡淡的黃色背景強調 */
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ffecb3;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .global-label {
+            display: block;
+            font-weight: 800;
+            color: #d35400;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        .global-input {
+            width: 100%;
+            max-width: 200px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .global-input:focus {
+            border-color: #d35400;
+            outline: none;
+        }
+
+        /* 分隔線 */
+        .divider {
+            height: 1px;
+            background: #eee;
+            margin: 20px 0;
+        }
+
+        /* 區塊標題 */
+        h2 {
+            font-size: 1.1rem;
+            border-left: 5px solid #3498db;
+            padding-left: 10px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* 輸入區 */
+        .input-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #555;
+        }
+        input.sub-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+        }
+
+        /* 按鈕 */
+        button.action-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        button.action-btn:active {
+            background-color: #2980b9;
+        }
+
+        /* 結果面板 */
+        .result-panel {
+            background: #eef7ff;
+            border: 1px solid #b3d7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .big-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #e74c3c;
+            display: block;
+            margin: 5px 0;
+        }
+
+        /* 滑桿區 */
+        .slider-wrapper {
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            text-align: center;
+        }
+        .speed-display {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2c3e50;
+        }
+        .base-ref {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 15px 0;
+            cursor: pointer;
+            height: 8px;
+        }
+
+        /* 表格 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #666;
+            font-size: 0.85rem;
+        }
+        .val-col {
+            text-align: right;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+        tr.highlight-row {
+            background-color: #fff8e1;
+        }
+        tr.highlight-row td {
+            color: #d35400;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="lang-bar">
+        <button class="lang-btn active" onclick="setLang('tw')">繁體中文</button>
+        <button class="lang-btn" onclick="setLang('jp')">日本語</button>
+        <button class="lang-btn" onclick="setLang('kr')">한국어</button>
+        <button class="lang-btn" onclick="setLang('en')">English</button>
+    </div>
+
+    <h1 id="txt_title">音遊 BPM 計算機</h1>
+
+    <div class="global-section">
+        <label class="global-label" id="lbl_base">🎵 步驟 1: 輸入原始歌曲 BPM</label>
+        <input type="number" id="baseBpm" class="global-input" value="150" inputmode="numeric">
+    </div>
+
+    <h2 id="txt_h_target">A. 目標推算</h2>
+    <div class="input-group">
+        <label id="lbl_target">目標練習 BPM</label>
+        <input type="number" id="targetBpm" class="sub-input" placeholder="例如: 180" inputmode="numeric">
+    </div>
+    <button class="action-btn" id="btn_calc" onclick="calculateGoal()">計算最佳倍率</button>
+
+    <div class="result-panel" id="calcResult" style="display:none;">
+        <div id="txt_suggest">建議設定 Play Speed</div>
+        <span class="big-number" id="suggestedSpeed">1.00</span>
+        <div id="suggestedActual">實際 BPM: -</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2 id="txt_h_sim">B. 密度模擬與換算</h2>
+    <div class="slider-wrapper">
+        <label id="lbl_slider">手動調整 Speed</label>
+        <div class="speed-display" id="currentSpeedDisplay">1.00</div>
+        <div class="base-ref" id="txt_base_ref">(Base: 150)</div>
+        
+        <input type="range" id="speedSlider" min="0" max="16" step="1" value="6" oninput="updateDensityTable()">
+        
+        <div style="font-size:0.95rem; color:#555;">
+            <span id="lbl_curr_actual">實際 BPM</span>: 
+            <span id="currentActualBpm" style="color:#2c3e50; font-weight:800; font-size:1.2rem;">150.0</span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th id="th_type">音符密度 (主體)</th>
+                <th id="th_equiv" style="text-align:right;">等效 16分音</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="highlight-row">
+                <td id="row_16">16分音 (標準)</td>
+                <td class="val-col" id="val-16">150.0</td>
+            </tr>
+            <tr>
+                <td id="row_8">8分音</td>
+                <td class="val-col" id="val-8">75.0</td>
+            </tr>
+            <tr>
+                <td id="row_12">12分音 (三連音)</td>
+                <td class="val-col" id="val-12">100.0</td>
+            </tr>
+            <tr>
+                <td id="row_24">24分音 (六連音)</td>
+                <td class="val-col" id="val-24">200.0</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // --- 多語系設定 ---
+    const i18n = {
+        tw: {
+            title: "INF BPM 計算機",
+            lbl_base: "🎵 步驟 1: 輸入原始歌曲 BPM",
+            h_target: "A. 目標推算",
+            lbl_target: "目標練習 BPM",
+            btn_calc: "計算最佳倍率 (Play Speed)",
+            txt_suggest: "建議設定 Play Speed",
+            txt_actual_res: "實際 BPM: ",
+            txt_error: "誤差",
+            h_sim: "B. 密度模擬與換算",
+            lbl_slider: "手動調整 Play Speed",
+            lbl_curr_actual: "實際 BPM",
+            th_type: "音符密度",
+            th_equiv: "等效 16分音 BPM",
+            row_16: "16分音 (標準)",
+            row_8: "8分音",
+            row_12: "12分音 (三連音)",
+            row_24: "24分音 (六連音)",
+            alert_msg: "請先輸入「原始歌曲 BPM」和「目標 BPM」"
+        },
+        jp: {
+            title: "INF BPM計算機",
+            lbl_base: "🎵 手順 1: 元のBPMを入力",
+            h_target: "A. 目標計算",
+            lbl_target: "目標BPM (Target)",
+            btn_calc: "最適倍率を計算",
+            txt_suggest: "推奨プレイスピード",
+            txt_actual_res: "実質BPM: ",
+            txt_error: "誤差",
+            h_sim: "B. 密度シミュレーション",
+            lbl_slider: "倍率調整 (Play Speed)",
+            lbl_curr_actual: "実質BPM",
+            th_type: "音符密度",
+            th_equiv: "16分音符換算",
+            row_16: "16分音符 (標準)",
+            row_8: "8分音符",
+            row_12: "12分音符 (3連符)",
+            row_24: "24分音符 (6連符)",
+            alert_msg: "元のBPMと目標BPMを入力してください"
+        },
+        kr: {
+            title: "INF BPM 계산기",
+            lbl_base: "🎵 1단계: 기본 BPM 입력",
+            h_target: "A. 목표 계산",
+            lbl_target: "목표 BPM (Target)",
+            btn_calc: "최적 배속 계산",
+            txt_suggest: "추천 플레이 속도",
+            txt_actual_res: "실제 BPM: ",
+            txt_error: "오차",
+            h_sim: "B. 밀도 시뮬레이션",
+            lbl_slider: "플레이 속도 조절",
+            lbl_curr_actual: "실제 BPM",
+            th_type: "노트 밀도",
+            th_equiv: "16비트 환산 BPM",
+            row_16: "16비트 (표준)",
+            row_8: "8비트",
+            row_12: "12비트 (3연음)",
+            row_24: "24비트 (6연음)",
+            alert_msg: "기본 BPM과 목표 BPM을 입력해주세요"
+        },
+        en: {
+            title: "INF BPM Calc",
+            lbl_base: "🎵 Step 1: Enter Base BPM",
+            h_target: "A. Target Calculation",
+            lbl_target: "Target BPM",
+            btn_calc: "Calculate Best Speed",
+            txt_suggest: "Best Play Speed",
+            txt_actual_res: "Actual BPM: ",
+            txt_error: "Error",
+            h_sim: "B. Density Simulation",
+            lbl_slider: "Adjust Play Speed",
+            lbl_curr_actual: "Actual BPM",
+            th_type: "Note Density",
+            th_equiv: "Equiv. 16th BPM",
+            row_16: "16th Note (Standard)",
+            row_8: "8th Note",
+            row_12: "12th Note (Triplets)",
+            row_24: "24th Note (Sextuplets)",
+            alert_msg: "Please enter Base BPM and Target BPM"
+        }
+    };
+
+    let currentLang = 'tw';
+
+    // 0.70 ~ 1.50
+    const speeds = [];
+    for(let i=70; i<=150; i+=5) {
+        speeds.push(i/100);
+    }
+
+    // DOM Elements
+    const baseBpmInput = document.getElementById('baseBpm');
+    const targetBpmInput = document.getElementById('targetBpm');
+    const slider = document.getElementById('speedSlider');
+    const displaySpeed = document.getElementById('currentSpeedDisplay');
+    const displayActual = document.getElementById('currentActualBpm');
+    const baseRefText = document.getElementById('txt_base_ref');
+
+    // 初始化
+    window.onload = function() {
+        setLang('tw');
+        updateDensityTable();
+    };
+
+    // 監聽：只要動了 Top 的 Base BPM，下面全部連動更新
+    baseBpmInput.addEventListener('input', function() {
+        // 如果下方計算結果是開著的，就自動重算
+        if(document.getElementById('calcResult').style.display !== 'none') {
+            calculateGoal(false); // false: 不移動滑桿，只更新數字
+        }
+        updateDensityTable(); // 更新密度表
+    });
+
+    // 語言切換
+    function setLang(lang) {
+        currentLang = lang;
+        const t = i18n[lang];
+
+        // 按鈕樣式
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        const btnIdx = {'tw':0, 'jp':1, 'kr':2, 'en':3};
+        document.querySelectorAll('.lang-btn')[btnIdx[lang]].classList.add('active');
+
+        // 文字替換
+        document.getElementById('txt_title').textContent = t.title;
+        document.getElementById('lbl_base').textContent = t.lbl_base;
+        document.getElementById('txt_h_target').textContent = t.h_target;
+        document.getElementById('lbl_target').textContent = t.lbl_target;
+        document.getElementById('btn_calc').textContent = t.btn_calc;
+        document.getElementById('txt_suggest').textContent = t.txt_suggest;
+        document.getElementById('txt_h_sim').textContent = t.h_sim;
+        document.getElementById('lbl_slider').textContent = t.lbl_slider;
+        document.getElementById('lbl_curr_actual').textContent = t.lbl_curr_actual;
+        document.getElementById('th_type').textContent = t.th_type;
+        document.getElementById('th_equiv').textContent = t.th_equiv;
+        
+        document.getElementById('row_16').textContent = t.row_16;
+        document.getElementById('row_8').textContent = t.row_8;
+        document.getElementById('row_12').textContent = t.row_12;
+        document.getElementById('row_24').textContent = t.row_24;
+
+        // 若已有計算結果，重新渲染文字
+        if(document.getElementById('calcResult').style.display !== 'none') {
+             calculateGoal(false);
+        }
+    }
+
+    // 計算功能
+    function calculateGoal(moveSlider = true) {
+        const base = parseFloat(baseBpmInput.value);
+        const target = parseFloat(targetBpmInput.value);
+        const t = i18n[currentLang];
+
+        if (!base || !target) {
+            if(moveSlider) alert(t.alert_msg);
+            return;
+        }
+
+        const ratio = target / base;
+        
+        let bestDiff = 999;
+        let bestIndex = 6;
+        
+        for(let i=0; i<speeds.length; i++) {
+            let diff = Math.abs(speeds[i] - ratio);
+            if(diff < bestDiff) {
+                bestDiff = diff;
+                bestIndex = i;
+            }
+        }
+
+        const bestSpeed = speeds[bestIndex];
+        const actual = base * bestSpeed;
+        const diffVal = actual - target;
+
+        const resultPanel = document.getElementById('calcResult');
+        resultPanel.style.display = 'block';
+        document.getElementById('suggestedSpeed').textContent = bestSpeed.toFixed(2);
+        
+        document.getElementById('suggestedActual').textContent = 
+            `${t.txt_actual_res}${actual.toFixed(1)} (${t.txt_error} ${diffVal > 0 ? '+' : ''}${diffVal.toFixed(1)})`;
+
+        if(moveSlider) {
+            slider.value = bestIndex;
+            updateDensityTable();
+        }
+    }
+
+    // 模擬表更新功能
+    function updateDensityTable() {
+        const idx = parseInt(slider.value);
+        const currentSpeed = speeds[idx];
+        
+        displaySpeed.textContent = currentSpeed.toFixed(2);
+
+        const base = parseFloat(baseBpmInput.value);
+        
+        // 更新小提示文字
+        if(base) {
+            baseRefText.textContent = `(Base: ${base})`;
+        } else {
+            baseRefText.textContent = "(Base: -)";
+        }
+
+        if(!base) {
+            displayActual.textContent = "-";
+            ['val-16','val-8','val-12','val-24'].forEach(id => document.getElementById(id).textContent = "-");
+            return;
+        }
+
+        const actualBpm = base * currentSpeed;
+        displayActual.textContent = actualBpm.toFixed(1);
+
+        document.getElementById('val-16').textContent = (actualBpm * 1.0).toFixed(1);
+        document.getElementById('val-8').textContent  = (actualBpm * 0.5).toFixed(1);
+        document.getElementById('val-12').textContent = (actualBpm * (2/3)).toFixed(1);
+        document.getElementById('val-24').textContent = (actualBpm * (4/3)).toFixed(1);
+    }
+</script>
+
+</body>
+</html>
